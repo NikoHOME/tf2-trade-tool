@@ -96,9 +96,9 @@ export class DealManager
 
 
         let dealBalance = tradeVariables.metalManager.findDealBalance(tradeVariables.ownCurrencies, tradeVariables.clientCurrencies, args[1], args[2]);
-        //console.log(dealBalance);
+        // console.log(dealBalance);
         
-        let dealArrayNamesClient = ["keys", "refinedMetal", "reclaimeMetal", "scrapMetal"];
+        let dealArrayNamesClient = ["keys", "refinedMetal", "reclaimedMetal", "scrapMetal"];
         let dealArrayNamesOwn = ["keysNegative", "refinedMetalNegative", "reclaimedMetalNegative", "scrapMetalNegative"];
         let currencyArrayNames = ["keyArray", "refinedArray", "reclaimedArray", "scrapArray"];
 
