@@ -1,0 +1,12 @@
+{
+  "type": "module",
+  "dependencies": {
+    "steam": "^1.4.1",
+    "steam-community": "^0.2.2",
+    "steam-resources": "^1.0.0",
+    "steam-session": "^1.3.0",
+    "steam-tradeoffer-manager": "^2.10.6",
+    "steam-user": "^4.29.1",
+    "steamid": "^2.0.0"
+  }
+}
