@@ -1,12 +1,16 @@
 
 import SteamCommunity from 'steamcommunity'
+import SteamUser from 'steam-user';
 
 let SteamID = SteamCommunity.SteamID;
-let community = new SteamCommunity();
+
 
 import { TradeVariables } from './trade_vars.js';
 
 let tradeVariables = new TradeVariables();
+
+tradeVariables.community = new SteamCommunity();
+tradeVariables.user = new SteamUser();
 
 
 import { EventEmitter } from 'node:events';
@@ -52,23 +56,24 @@ function readSteamGuardCode(steamGuardCode)
 }
 
 
-function communityLoginCallback(err)
+function steamLoginCallback(err)
 {   
     if(err)
     {
-        // console.log(err);
+        console.log(err);
         console.log("Login Failed");
         process.emit("steamGuardRetry");
         return;
     }
     
-    process.emit("communityLogin");
+    process.emit("steamLogin");
 }
 
 
 import { steamIdToString } from './parse.js';
 import TradeOfferManager from 'steam-tradeoffer-manager';
 import { readInput } from './input.js';
+
 
 class SteamGuardCode
 {
@@ -78,13 +83,38 @@ class SteamGuardCode
     }
 }
 
+import { saveRefreshToken, readRefreshToken } from './parse.js';
+
 function loginToSteam(parsedInfo, session)
 {   
     let steamGuardCode = new SteamGuardCode();
     const maxLoginRetries = 5;
     let loginRetries = 0;
 
-    readSteamGuardCode(steamGuardCode);
+
+    let token = readRefreshToken();
+
+    if(token == "empty")
+    {
+        readSteamGuardCode(steamGuardCode);
+    }
+    else
+    {
+        tradeVariables.token = token;
+        tradeVariables.user.logOn({
+            refreshToken: token,
+            rememberPassword: true,
+        });
+    }
+
+
+    tradeVariables.user.on("loginKey", function(token) {
+        tradeVariables.token = token;
+        saveRefreshToken(token);
+        
+        tradeVariables.community.login
+
+    });
 
 
     process.on("steamGuardRetry", () => {
@@ -102,23 +132,42 @@ function loginToSteam(parsedInfo, session)
     });
 
     process.on("steamGuardLogin", () => {
-        community.login({
+        tradeVariables.user.logOn({
             accountName: parsedInfo.accountName,
             password: parsedInfo.password,
             twoFactorCode: steamGuardCode.value,
-        }, communityLoginCallback);
+            rememberPassword: true,
+        });
     });
 
-    process.on("communityLogin", () => {
+    tradeVariables.user.on("loggedOn", function() {
+        steamLoginCallback();
+        tradeVariables.user.webLogOn();
+    });
+
+
+    process.on("steamLogin", () => {
+        // tradeVariables.user.webLogOn();
+
         tradeVariables.tradeManager = new TradeOfferManager({
-            "community": community,
+            "community": tradeVariables.community,
+            "steam": tradeVariables.user,
             // "domain": "localhost", // Fill this in with your own domain
             "language": "en"
         });
 
+        
+        
+        // tradeVariables.community.getClientLogonToken((err, details) => {
+        //     if (err) {
+        //         handleErrorSomehow(err);
+        //     } else {
+        //         tradeVariables.user.logOn(details);
+        //     }
+        // });
 
-        tradeVariables.mySid = new SteamID(steamIdToString(community.steamID));
-        tradeVariables.clientTradeLink = parsedInfo.tradeURL;
+        tradeVariables.mySid = new SteamID(steamIdToString(tradeVariables.user.steamID));
+        tradeVariables.user.removeAllListeners("loggedOn");
         readInput(tradeVariables);
     });
 }

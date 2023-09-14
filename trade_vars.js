@@ -5,7 +5,7 @@ export class TradeVariables
 {
     constructor()
     {
-        this.offer;
+        this.offer = null;
         this.clientCurrencies = new Currencies();
         this.ownCurrencies = new Currencies();
         this.ownInventory;
@@ -21,5 +21,10 @@ export class TradeVariables
         this.dealManager;
         this.tradeManager;
         this.eventEmitter;
+
+
+        this.token;
+        this.community;
+        this.user;
     }
 }

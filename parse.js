@@ -9,7 +9,7 @@ class ConfigInfo
     }
 }
 
-import { readFile } from 'fs';
+import { readFile, writeFile, readFileSync } from 'fs';
 
 export function parseFile(path, callback)
 {
@@ -55,5 +55,26 @@ export function steamIdToString(steamID)
     // }
 
     // steamID:[U:1:143281396]
+}
+
+
+export function saveRefreshToken(token)
+{
+    writeFile("./token", token, function(err) {
+        if(err)
+        {
+            console.log(err);
+            return;
+        }
+    }); 
+}
+
+import { existsSync } from 'fs';
+
+export function readRefreshToken()
+{
+    if(existsSync("./token"))
+        return readFileSync("./token", 'utf8');
+    return "empty";
 }
 

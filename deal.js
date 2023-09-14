@@ -46,6 +46,8 @@ export class DealManager
     {
         if(err)
             console.log(err);
+        else
+            console.log("Offer Sent");
         //console.log(status);
         process.emit("offerSent")
         
@@ -55,7 +57,6 @@ export class DealManager
     addDealListeners(tradeVariables)
     {
         process.on("offerSent", () => {
-            console.log("Offer Sent");
             tradeVariables.readLine.prompt();
         });
     } 
@@ -96,7 +97,9 @@ export class DealManager
 
 
         let dealBalance = tradeVariables.metalManager.findDealBalance(tradeVariables.ownCurrencies, tradeVariables.clientCurrencies, args[1], args[2]);
-        // console.log(dealBalance);
+        
+        if(dealBalance == null)
+            return null;
         
         let dealArrayNamesClient = ["keys", "refinedMetal", "reclaimedMetal", "scrapMetal"];
         let dealArrayNamesOwn = ["keysNegative", "refinedMetalNegative", "reclaimedMetalNegative", "scrapMetalNegative"];

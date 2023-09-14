@@ -151,8 +151,8 @@ export class MetalManager
         let simpleCurrenciesOwn = this.simplifyCurrencies(ownCurrencies);
         let simpleCurrenciesClient = this.simplifyCurrencies(clientCurrencies);
 
-        console.log(simpleCurrenciesOwn);
-        console.log(simpleCurrenciesClient);
+        //console.log(simpleCurrenciesOwn);
+        //console.log(simpleCurrenciesClient);
 
         if(keys < 0 && simpleCurrenciesOwn.keys < Math.abs(keys))
         {
