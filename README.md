@@ -1,6 +1,8 @@
 # steam-trade-tool W.I.P
 
 A simple terminal tool for trading tf2 items.
+Precisely calculated the metal values to balance a trade deal.
+Creates a trade offer with a minimal ammount of items needed.
 
 Currently avaible actions :
 - url (creates a trade offer from a trade url)
@@ -11,7 +13,7 @@ Currently avaible actions :
 ## deal formating
 
 - [keys] - ammount of keys the client will give, can be negative
-- [metal] - ammount of metal the client will five, can be negative, **represented with refined metal fractions e.g. 12.33**
+- [metal] - ammount of metal the client will give, can be negative, **represented with refined metal fractions e.g. 12.33 = 12 refined + 1 reclaimed**
 - [my_items] - list of your items with market names seperated by a space, **multiple words in an item name are seperated by an undersoce e.g. The_Jag**
 - [:] - own item and client item seperator
 - [client_items] - the same as above  
