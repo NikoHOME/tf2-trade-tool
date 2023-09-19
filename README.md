@@ -1,8 +1,8 @@
 # steam-trade-tool W.I.P
 
-A simple terminal tool for trading tf2 items.
-Precisely calculated the metal values to balance a trade deal.
-Creates a trade offer with a minimal ammount of items needed.
+A simple terminal tool for trading tf2 items. 
+Precisely calculated the metal values to balance a trade deal. 
+Creates a trade offer with a minimal ammount of items needed. 
 
 Currently avaible actions :
 - url (creates a trade offer from a trade url)
