@@ -1,7 +1,7 @@
 
-function processCurrencies(tradeVariables, item, currencies)
+function processCurrencies(programMemory, item, currencies)
 {
-    let metalNameIndex =  tradeVariables.metalManager.currencyNames.indexOf(item.market_name);
+    let metalNameIndex =  programMemory.metalManager.currencyNames.indexOf(item.market_name);
     if(metalNameIndex > -1)
     {
         for(let element of item.tags)
@@ -41,7 +41,7 @@ function partnerCallback(err, inventory) {
     }
 
     process.emit("partnerInventoryLoaded", inventory);    
-    //tradeVariables.tradeManager.getUserInventoryContents(tradeVariables.mySid,  tradeVariables.gameAppID,  tradeVariables.inventoryContext, true,  ownCallback)
+    //programMemory.tradeManager.getUserInventoryContents(programMemory.mySid,  programMemory.gameAppID,  programMemory.inventoryContext, true,  ownCallback)
 };
 
 
@@ -60,33 +60,32 @@ function ownCallback(err, inventory) {
 
 
 
-export function fetch(tradeVariables)
+export function fetch(programMemory)
 {
-    tradeVariables.offer.getPartnerInventoryContents(tradeVariables.gameAppID, tradeVariables.inventoryContext, partnerCallback);
+    programMemory.offer.getPartnerInventoryContents(programMemory.gameAppID, programMemory.inventoryContext, partnerCallback);
     
 }
 
 
-export function addFetchListeners(tradeVariables)
+export function addFetchListeners(programMemory)
 {
     process.on("partnerInventoryLoaded", (inventory) => {
 
         inventory.forEach(element => {
-            processCurrencies(tradeVariables, element, tradeVariables.clientCurrencies)
+            processCurrencies(programMemory, element, programMemory.clientCurrencies)
         });
     
-        tradeVariables.clientInventory = inventory;
-        tradeVariables.tradeManager.getUserInventoryContents(tradeVariables.mySid,  tradeVariables.gameAppID,  tradeVariables.inventoryContext, true,  ownCallback)
+        programMemory.clientInventory = inventory;
+        programMemory.tradeManager.getUserInventoryContents(programMemory.mySid,  programMemory.gameAppID,  programMemory.inventoryContext, true,  ownCallback)
     });
 
     process.on("ownInventoryLoaded", (inventory) => {
         inventory.forEach(element => {
-            processCurrencies(tradeVariables, element, tradeVariables.ownCurrencies)
+            processCurrencies(programMemory, element, programMemory.ownCurrencies)
         });
     
-        tradeVariables.ownInventory = inventory;
-        console.log("Fetch Ended");
-        tradeVariables.readLine.prompt();
+        programMemory.ownInventory = inventory;
+        process.emit("fetchEnded");
     });
 }
 

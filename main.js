@@ -5,37 +5,38 @@ import SteamUser from 'steam-user';
 let SteamID = SteamCommunity.SteamID;
 
 
-import { TradeVariables } from './trade_vars.js';
+import { ProgramMemory } from './src/memory.js';
 
-let tradeVariables = new TradeVariables();
+let programMemory = new ProgramMemory();
 
-tradeVariables.community = new SteamCommunity();
-tradeVariables.user = new SteamUser();
+programMemory.community = new SteamCommunity();
+programMemory.user = new SteamUser();
 
 
 import { EventEmitter } from 'node:events';
 
-tradeVariables.eventEmitter = new EventEmitter();
+programMemory.eventEmitter = new EventEmitter();
 
 import * as Readline from 'node:readline/promises';
 
-tradeVariables.readLine = Readline.createInterface({
+programMemory.readLine = Readline.createInterface({
     input: process.stdin,
     output: process.stdout,
 });
 
 
-import { MetalManager } from './metal.js';
-import { DealManager } from "./deal.js"
+import { MetalManager } from './src/metal.js';
+import { DealManager } from "./src/deal.js"
 
-tradeVariables.dealManager = new DealManager();
-tradeVariables.metalManager = new MetalManager();
+programMemory.dealManager = new DealManager();
+programMemory.metalManager = new MetalManager();
 
 
 
-import {parseFile} from './parse.js'
+import {parseConfig, checkForConfig} from './src/file.js'
 
-parseFile("./config.conf", parseCallback);
+checkForConfig();
+parseConfig("./config.conf", parseCallback);
 
 function parseCallback(parsedInfo)
 {
@@ -45,34 +46,34 @@ function parseCallback(parsedInfo)
 
 function readSteamGuardCode(steamGuardCode)
 {
-    tradeVariables.readLine.setPrompt('Steam Guard Code: ');
-    tradeVariables.readLine.prompt();
+    programMemory.readLine.setPrompt('Steam Guard Code: ');
+    programMemory.readLine.prompt();
 
-    tradeVariables.readLine.on('line', (code) => {
-        tradeVariables.readLine.removeAllListeners("line");
+    programMemory.readLine.on('line', (code) => {
+        programMemory.readLine.removeAllListeners("line");
         steamGuardCode.value = code;
         process.emit("steamGuardLogin");
     });
 }
 
 
-function steamLoginCallback(err)
-{   
-    if(err)
-    {
-        console.log(err);
-        console.log("Login Failed");
-        process.emit("steamGuardRetry");
-        return;
-    }
+// function steamLoginCallback(err)
+// {   
+//     if(err)
+//     {
+//         console.log(err);
+//         console.log("Login Failed");
+//         process.emit("steamGuardRetry");
+//         return;
+//     }
     
-    process.emit("steamLogin");
-}
+//     process.emit("steamLogin");
+// }
 
 
-import { steamIdToString } from './parse.js';
+import { steamIdToString } from './src/file.js';
 import TradeOfferManager from 'steam-tradeoffer-manager';
-import { readInput } from './input.js';
+import { readInput } from './src/input.js';
 
 
 class SteamGuardCode
@@ -83,14 +84,21 @@ class SteamGuardCode
     }
 }
 
-import { saveRefreshToken, readRefreshToken } from './parse.js';
+import { saveRefreshToken, readRefreshToken} from './src/file.js';
 
 function loginToSteam(parsedInfo, session)
 {   
     let steamGuardCode = new SteamGuardCode();
-    const maxLoginRetries = 5;
-    let loginRetries = 0;
+    // const maxLoginRetries = 5;
+    // let loginRetries = 0;
 
+    
+
+    if(!parsedInfo.accountName || !parsedInfo.password)
+    {
+        console.log("Missing account info in config.conf file");
+        process.exit(1);
+    }
 
     let token = readRefreshToken();
 
@@ -100,39 +108,38 @@ function loginToSteam(parsedInfo, session)
     }
     else
     {
-        tradeVariables.token = token;
-        tradeVariables.user.logOn({
+        programMemory.token = token;
+        programMemory.user.logOn({
             refreshToken: token,
             rememberPassword: true,
         });
     }
 
 
-    tradeVariables.user.on("loginKey", function(token) {
-        tradeVariables.token = token;
+    programMemory.user.on("loginKey", function(token) {
+        programMemory.token = token;
         saveRefreshToken(token);
-        
-        tradeVariables.community.login
-
     });
 
 
-    process.on("steamGuardRetry", () => {
 
-        if(loginRetries >= maxLoginRetries)
-        {
-            loginRetries = 0;
-            console.log("Login failed after 5 retries")
-            readSteamGuardCode(steamGuardCode);
-            return;
-        }
 
-        loginRetries +=1;
-        process.emit("steamGuardLogin");
-    });
+    // process.on("steamGuardRetry", () => {
+
+    //     if(loginRetries >= maxLoginRetries)
+    //     {
+    //         loginRetries = 0;
+    //         console.log("Login failed after 5 retries")
+    //         readSteamGuardCode(steamGuardCode);
+    //         return;
+    //     }
+
+    //     loginRetries +=1;
+    //     process.emit("steamGuardLogin");
+    // });
 
     process.on("steamGuardLogin", () => {
-        tradeVariables.user.logOn({
+        programMemory.user.logOn({
             accountName: parsedInfo.accountName,
             password: parsedInfo.password,
             twoFactorCode: steamGuardCode.value,
@@ -140,36 +147,27 @@ function loginToSteam(parsedInfo, session)
         });
     });
 
-    tradeVariables.user.on("loggedOn", function() {
-        steamLoginCallback();
-        tradeVariables.user.webLogOn();
+    programMemory.user.on("loggedOn", function() {
+        programMemory.user.removeAllListeners("loggedOn");
+        startTradeManager(programMemory)
     });
 
-
-    process.on("steamLogin", () => {
-        // tradeVariables.user.webLogOn();
-
-        tradeVariables.tradeManager = new TradeOfferManager({
-            "community": tradeVariables.community,
-            "steam": tradeVariables.user,
-            // "domain": "localhost", // Fill this in with your own domain
-            "language": "en"
-        });
-
-        
-        
-        // tradeVariables.community.getClientLogonToken((err, details) => {
-        //     if (err) {
-        //         handleErrorSomehow(err);
-        //     } else {
-        //         tradeVariables.user.logOn(details);
-        //     }
-        // });
-
-        tradeVariables.mySid = new SteamID(steamIdToString(tradeVariables.user.steamID));
-        tradeVariables.user.removeAllListeners("loggedOn");
-        readInput(tradeVariables);
+    programMemory.user.on("webSession", function(sessionID, cookies) {
+        programMemory.community.setCookies(cookies);
     });
+
+}
+
+function startTradeManager(programMemory)
+{
+    programMemory.tradeManager = new TradeOfferManager({
+        "community": programMemory.community,
+        "steam": programMemory.user,
+        "language": "en"
+    });
+
+    programMemory.mySid = new SteamID(steamIdToString(programMemory.user.steamID));
+    readInput(programMemory);
 }
 
 

@@ -1,7 +1,7 @@
 
 import { Currencies } from "./metal.js";
 
-export class TradeVariables
+export class ProgramMemory
 {
     constructor()
     {

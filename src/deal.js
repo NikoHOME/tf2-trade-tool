@@ -1,6 +1,6 @@
 
 
-
+import { restartProgram } from "./input.js";
 export class DealManager 
 {
     constructor() {
@@ -46,23 +46,13 @@ export class DealManager
     {
         if(err)
             console.log(err);
-        else
-            console.log("Offer Sent");
         //console.log(status);
         process.emit("offerSent")
         
     }
 
 
-    addDealListeners(tradeVariables)
-    {
-        process.on("offerSent", () => {
-            tradeVariables.readLine.prompt();
-        });
-    } 
-
-
-    dealCase(args, tradeVariables)
+    dealCase(args, programMemory)
     {
         let ownItemsQuery = [];
         let clientItemsQuery = [];
@@ -80,8 +70,8 @@ export class DealManager
         //console.log(ownItemsQuery);
         //console.log(clientItemsQuery);
 
-        let ownFoundItems = this.findItems(ownItemsQuery, tradeVariables.ownInventory);
-        let clientFoundItems = this.findItems(clientItemsQuery, tradeVariables.clientInventory);
+        let ownFoundItems = this.findItems(ownItemsQuery, programMemory.ownInventory);
+        let clientFoundItems = this.findItems(clientItemsQuery, programMemory.clientInventory);
 
         if(ownFoundItems == "err" || clientFoundItems == "err")
         {
@@ -92,11 +82,11 @@ export class DealManager
         //console.log(ownFoundItems);
         //console.log(clientFoundItems);
 
-        tradeVariables.offer.addMyItems(ownFoundItems);
-        tradeVariables.offer.addTheirItems(clientFoundItems);
+        programMemory.offer.addMyItems(ownFoundItems);
+        programMemory.offer.addTheirItems(clientFoundItems);
 
 
-        let dealBalance = tradeVariables.metalManager.findDealBalance(tradeVariables.ownCurrencies, tradeVariables.clientCurrencies, args[1], args[2]);
+        let dealBalance = programMemory.metalManager.findDealBalance(programMemory.ownCurrencies, programMemory.clientCurrencies, args[1], args[2]);
         
         if(dealBalance == null)
             return null;
@@ -109,7 +99,7 @@ export class DealManager
         {
             for(let i = 0; i < dealBalance[dealArrayNamesClient[name]] ; ++i)
             {
-                tradeVariables.offer.addTheirItem(tradeVariables.clientCurrencies[currencyArrayNames[name]][i]);
+                programMemory.offer.addTheirItem(programMemory.clientCurrencies[currencyArrayNames[name]][i]);
             }
         }
 
@@ -118,13 +108,13 @@ export class DealManager
             //console.log(dealArrayNamesOwn[name]);
             for(let i = 0; i < dealBalance[dealArrayNamesOwn[name]] ; ++i)
             {
-                tradeVariables.offer.addMyItem(tradeVariables.ownCurrencies[currencyArrayNames[name]][i]);
-                //console.log(tradeVariables.ownCurrencies[currencyArrayNames[name]][i].market_name);
+                programMemory.offer.addMyItem(programMemory.ownCurrencies[currencyArrayNames[name]][i]);
+                //console.log(programMemory.ownCurrencies[currencyArrayNames[name]][i].market_name);
             }
         }
 
-        tradeVariables.offer.send(this.offerCallback);
-        tradeVariables.offer = tradeVariables.tradeManager.createOffer(tradeVariables.clientTradeLink);
+        programMemory.offer.send(this.offerCallback);
+        programMemory.offer = programMemory.tradeManager.createOffer(programMemory.clientTradeLink);
     }
 }
 
