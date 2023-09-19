@@ -96,3 +96,12 @@ export function checkForConfig() {
     if(!existsSync("./config.conf"))
         writeFileSync("./config.conf", "accountName:\npassword:\n");
 }
+
+
+import { mkdirSync } from 'fs';
+
+export function checkForCacheDir()
+{
+    if(!existsSync("./cache"))
+        mkdirSync("./cache");
+}

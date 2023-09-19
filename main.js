@@ -33,9 +33,11 @@ programMemory.metalManager = new MetalManager();
 
 
 
-import {parseConfig, checkForConfig} from './src/file.js'
+import {parseConfig, checkForConfig, checkForCacheDir} from './src/file.js'
 
 checkForConfig();
+checkForCacheDir();
+
 parseConfig("./config.conf", parseCallback);
 
 function parseCallback(parsedInfo)
