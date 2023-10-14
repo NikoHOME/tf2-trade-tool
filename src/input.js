@@ -23,10 +23,9 @@ export function restartProgram() {
 
 }
 
-import { readTradeUrl, removeTradeUrl, saveTradeUrl } from "./file.js";
+import { readTradeUrl, removeTradeUrl, saveTradeUrl, readLastCommand, saveLastCommand, readManual} from "./file.js";
 
-function exitProgram()
-{
+function exitProgram() {
     removeTradeUrl();
     process.exit(0);
 }
@@ -35,7 +34,7 @@ import { fetch, addFetchListeners } from "./fetch.js";
 
 export function readInput(programMemory) {
 
-    programMemory.readLine.setPrompt('Command: ');
+    programMemory.readLine.setPrompt('$ Command: ');
     addFetchListeners(programMemory);
     
     let url = readTradeUrl();
@@ -53,15 +52,16 @@ export function readInput(programMemory) {
         if(error)
         {
             console.log(error);
+            console.log("<!!> Offer Error");
             restartProgram();
             return;
         }
-        console.log("Offer Sent");
+        console.log("<++> Offer Sent");
         restartProgram();
     });
 
     process.on("fetchEnded", () => {
-        console.log("Inventory fetch ended");
+        console.log("<++> Inventory fetch ended");
         programMemory.readLine.prompt();
     });
    
@@ -75,7 +75,13 @@ export function readInput(programMemory) {
                 fetch(programMemory); //emits fetchEnded
                 break;
             case "deal":
+                saveLastCommand(command);
                 programMemory.dealManager.dealCase(args, programMemory); //emits offerSent
+                break;
+            case "again": //repeat last command
+                let lastCommand = readLastCommand();
+                console.log("<++> Last Command: " + lastCommand);
+                programMemory.readLine.emit("line",lastCommand);
                 break;
             case "url":
                 if(args[1]) {
@@ -90,7 +96,13 @@ export function readInput(programMemory) {
             case "exit":
                 exitProgram();
                 break;
+            case "help":
+                let manual = readManual();
+                console.log(manual);
+                programMemory.readLine.prompt();
+                break;
             default:
+                console.log("<??> Unknown command, type help for help");
                 programMemory.readLine.prompt();
         }
     });

@@ -83,7 +83,8 @@ export function saveTradeUrl(url) {
 
 export function removeTradeUrl()
 {
-    unlinkSync("./cache/url");
+    if(existsSync("./cache/url"))
+        unlinkSync("./cache/url");
 }
 
 export function readTradeUrl() {
@@ -100,8 +101,24 @@ export function checkForConfig() {
 
 import { mkdirSync } from 'fs';
 
-export function checkForCacheDir()
-{
+export function checkForCacheDir() {
     if(!existsSync("./cache"))
         mkdirSync("./cache");
+}
+
+export function readLastCommand() {
+    if(existsSync("./cache/last_command"))
+        return readFileSync("./cache/last_command", 'utf8');
+    return "empty";
+}
+
+export function saveLastCommand(command) {
+    if(!existsSync("./cache/last_command"))
+        writeFileSync("./cache/last_command", command);
+}
+
+export function readManual() {
+    if(existsSync("./man"))
+        return readFileSync("./man", 'utf8');
+    return "empty";
 }
