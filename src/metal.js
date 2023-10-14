@@ -200,7 +200,7 @@ export class MetalManager
         }
         else
         {
-            console.log("Not enough currency")
+            console.log("Not enough metal [Own/Client]")
             return null
         }
     }

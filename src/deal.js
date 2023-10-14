@@ -45,7 +45,10 @@ export class DealManager
     offerCallback(err, status)
     {
         if(err)
-            console.log(err);
+        {
+            process.emit("offerSent",err);
+            return;
+        }
         //console.log(status);
         process.emit("offerSent")
         
@@ -57,7 +60,8 @@ export class DealManager
         let ownItemsQuery = [];
         let clientItemsQuery = [];
         let iterator = 3;
-        for(; args[iterator] != ":"; ++iterator)
+
+        for(; args[iterator] != ":" && iterator < args.length ; ++iterator)
         {
             ownItemsQuery.push(args[iterator].replaceAll("_"," "));
         }

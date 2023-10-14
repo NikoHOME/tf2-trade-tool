@@ -13,9 +13,9 @@ export function restartProgram() {
             process.argv.shift(),
             process.argv,
             {
-            cwd: process.cwd(),
-            detached: true,
-            stdio: "inherit"
+                cwd: process.cwd(),
+                detached: true,
+                stdio: "inherit"
             }
         );
     });
@@ -37,8 +37,7 @@ export function readInput(programMemory) {
 
     programMemory.readLine.setPrompt('Command: ');
     addFetchListeners(programMemory);
-    programMemory.readLine.prompt();
-
+    
     let url = readTradeUrl();
 
     if(url != "empty") {
@@ -46,11 +45,19 @@ export function readInput(programMemory) {
         programMemory.offer = programMemory.tradeManager.createOffer(programMemory.clientTradeLink);
         fetch(programMemory);
     }
+    else {
+        programMemory.readLine.prompt();
+    }
 
-    process.on("offerSent", () => {
+    process.on("offerSent", (error) => {
+        if(error)
+        {
+            console.log(error);
+            restartProgram();
+            return;
+        }
         console.log("Offer Sent");
         restartProgram();
-        // programMemory.readLine.prompt();
     });
 
     process.on("fetchEnded", () => {
