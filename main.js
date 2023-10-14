@@ -132,10 +132,16 @@ function loginToSteam(parsedInfo, session)
         });
     });
 
-    programMemory.user.on("loggedOn", function() {
-        programMemory.user.removeAllListeners("loggedOn");
+    programMemory.user.on("accountInfo", function(name) {
+        console.log("<++> Successfully logged on as \'" + name +"\'" );
+        programMemory.user.removeAllListeners("accountInfo");
         startTradeManager(programMemory)
     });
+
+    // programMemory.user.on("loggedOn", function() {
+    //     //console.log("<++> Successfully logged on as " + programMemory.user.accountInfo);
+        
+    // });
 
     programMemory.user.on("webSession", function(sessionID, cookies) {
         programMemory.community.setCookies(cookies);
