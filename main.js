@@ -123,23 +123,6 @@ function loginToSteam(parsedInfo, session)
         saveRefreshToken(token);
     });
 
-
-
-
-    // process.on("steamGuardRetry", () => {
-
-    //     if(loginRetries >= maxLoginRetries)
-    //     {
-    //         loginRetries = 0;
-    //         console.log("Login failed after 5 retries")
-    //         readSteamGuardCode(steamGuardCode);
-    //         return;
-    //     }
-
-    //     loginRetries +=1;
-    //     process.emit("steamGuardLogin");
-    // });
-
     process.on("steamGuardLogin", () => {
         programMemory.user.logOn({
             accountName: parsedInfo.accountName,

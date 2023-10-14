@@ -41,7 +41,6 @@ function partnerCallback(err, inventory) {
     }
 
     process.emit("partnerInventoryLoaded", inventory);    
-    //programMemory.tradeManager.getUserInventoryContents(programMemory.mySid,  programMemory.gameAppID,  programMemory.inventoryContext, true,  ownCallback)
 };
 
 
@@ -53,9 +52,6 @@ function ownCallback(err, inventory) {
         return;
     }
     process.emit("ownInventoryLoaded", inventory);    
-    
-    // console.log("Fetch Ended");
-    // readInput();
 };
 
 

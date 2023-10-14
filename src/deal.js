@@ -71,8 +71,6 @@ export class DealManager
             clientItemsQuery.push(args[iterator].replaceAll("_"," "));
         }
 
-        //console.log(ownItemsQuery);
-        //console.log(clientItemsQuery);
 
         let ownFoundItems = this.findItems(ownItemsQuery, programMemory.ownInventory);
         let clientFoundItems = this.findItems(clientItemsQuery, programMemory.clientInventory);
@@ -82,9 +80,6 @@ export class DealManager
             console.log("Items missing trade aborted");
             return null;
         }
-
-        //console.log(ownFoundItems);
-        //console.log(clientFoundItems);
 
         programMemory.offer.addMyItems(ownFoundItems);
         programMemory.offer.addTheirItems(clientFoundItems);
@@ -109,11 +104,9 @@ export class DealManager
 
         for(let name = 0; name < 4; ++name)
         {
-            //console.log(dealArrayNamesOwn[name]);
             for(let i = 0; i < dealBalance[dealArrayNamesOwn[name]] ; ++i)
             {
                 programMemory.offer.addMyItem(programMemory.ownCurrencies[currencyArrayNames[name]][i]);
-                //console.log(programMemory.ownCurrencies[currencyArrayNames[name]][i].market_name);
             }
         }
 
@@ -122,5 +115,3 @@ export class DealManager
     }
 }
 
-
-// module.exports = DealManager;
