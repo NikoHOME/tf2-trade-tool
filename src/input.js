@@ -23,50 +23,23 @@ export function restartProgram() {
 
 }
 
-import { readTradeUrl, removeTradeUrl, saveTradeUrl, readLastCommand, saveLastCommand, readManual} from "./file.js";
+import * as file from "./file.js";
 
 function exitProgram() {
-    removeTradeUrl();
+    file.removeTradeUrl();
+    file.removeFailedOffer();
     process.exit(0);
 }
 
-import { fetch, addFetchListeners } from "./fetch.js";
-
-export function readInput(programMemory) {
-
-    programMemory.readLine.setPrompt('$ Command: ');
-    addFetchListeners(programMemory);
-    
-    let url = readTradeUrl();
-
-    if(url != "empty") {
-        programMemory.clientTradeLink = url;
-        programMemory.offer = programMemory.tradeManager.createOffer(programMemory.clientTradeLink);
-        fetch(programMemory);
-    }
-    else {
-        programMemory.readLine.prompt();
-    }
-
-    process.on("offerSent", (error) => {
-        if(error)
-        {
-            console.log(error);
-            console.log("<!!> Offer Error");
-            restartProgram();
-            return;
-        }
-        console.log("<++> Offer Sent");
-        restartProgram();
-    });
-
-    process.on("fetchEnded", () => {
-        console.log("<++> Inventory fetch ended");
-        programMemory.readLine.prompt();
-    });
-   
+function addReadLineEvent(programMemory)
+{
     programMemory.readLine.on('line', (command) => {
+
         let args = command.split(" ");
+
+        if(args[0] != "again") //prevent infinite loop
+            file.saveLastCommand(command);
+
         switch(args[0]) {   
             case "new":
                 restartProgram();
@@ -75,29 +48,34 @@ export function readInput(programMemory) {
                 fetch(programMemory); //emits fetchEnded
                 break;
             case "deal":
-                saveLastCommand(command);
+                if(programMemory.offer == null) {
+                    console.log("<!!> No client specified use the url command");
+                    programMemory.readLine.prompt();
+                    break;
+                }
                 programMemory.dealManager.dealCase(args, programMemory); //emits offerSent
                 break;
             case "again": //repeat last command
-                let lastCommand = readLastCommand();
-                console.log("<++> Last Command: " + lastCommand);
-                programMemory.readLine.emit("line",lastCommand);
+                let lastCommand = file.readLastCommand();
+                console.log("<++> Last Command: " + "\'" + lastCommand + "\'");
+                programMemory.readLine.emit("line", lastCommand);
                 break;
             case "url":
-                if(args[1]) {
+                if(args.length > 1) {
                     programMemory.clientTradeLink = args[1];
                     programMemory.offer = programMemory.tradeManager.createOffer(programMemory.clientTradeLink);
-                    saveTradeUrl(args[1]);
+                    file.saveTradeUrl(args[1]);
                     fetch(programMemory); //emits fetchEnded
                     break;
                 }
+                console.log("<!!> Missing client trade link");
                 programMemory.readLine.prompt();
                 break;
             case "exit":
                 exitProgram();
                 break;
             case "help":
-                let manual = readManual();
+                let manual = file.readManual();
                 console.log(manual);
                 programMemory.readLine.prompt();
                 break;
@@ -106,4 +84,57 @@ export function readInput(programMemory) {
                 programMemory.readLine.prompt();
         }
     });
+}
+
+import { fetch, addFetchListeners } from "./fetch.js";
+
+export function readInput(programMemory) {
+
+    programMemory.readLine.setPrompt('$ Command: ');
+    addFetchListeners(programMemory);
+    addReadLineEvent(programMemory);
+    
+    
+    let savedUrl = file.readTradeUrl(); //Check if we saved the trade link before exiting
+
+    if(savedUrl != "empty") {
+        programMemory.clientTradeLink = savedUrl;
+        programMemory.offer = programMemory.tradeManager.createOffer(programMemory.clientTradeLink);
+        fetch(programMemory);
+    }
+    else {
+        programMemory.readLine.prompt();
+    }
+
+    
+
+    process.on("offerSent", (error) => {
+        if(error)
+        {
+            console.log(error);
+            console.log("<!!> Offer Error");
+            file.cacheFailedOffer(file.readLastCommand());
+            restartProgram();
+            return;
+        }
+        file.removeFailedOffer();
+        console.log("<++> Offer Sent");
+        restartProgram();
+    });
+
+    process.on("fetchEnded", () => {
+        console.log("<++> Inventory fetch ended");
+
+        let failedOffer = file.readFailedOffer(); // Check if the last offer failed
+
+        if(failedOffer != "empty") {
+            console.log("<++> Retrying offer: " + "\'" + failedOffer + "\'");
+            programMemory.readLine.emit("line", failedOffer);
+            return;
+        }
+
+        programMemory.readLine.prompt();
+    });
+   
+   
 }

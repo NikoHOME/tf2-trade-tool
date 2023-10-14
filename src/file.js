@@ -113,12 +113,28 @@ export function readLastCommand() {
 }
 
 export function saveLastCommand(command) {
-    if(!existsSync("./cache/last_command"))
-        writeFileSync("./cache/last_command", command);
+    writeFileSync("./cache/last_command", command);
 }
 
 export function readManual() {
     if(existsSync("./man"))
         return readFileSync("./man", 'utf8');
     return "empty";
+}
+
+export function cacheFailedOffer(command) {
+    writeFileSync("./cache/failed_command", command);
+}
+
+export function readFailedOffer()
+{
+    if(existsSync("./cache/failed_command"))
+        return readFileSync("./cache/failed_command", 'utf8');
+    return "empty";
+}
+
+export function removeFailedOffer()
+{
+    if(existsSync("./cache/failed_command"))
+        unlinkSync("./cache/failed_command");
 }

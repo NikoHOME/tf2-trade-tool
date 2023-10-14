@@ -139,7 +139,7 @@ function loginToSteam(parsedInfo, session)
     });
 
     // programMemory.user.on("loggedOn", function() {
-    //     //console.log("<++> Successfully logged on as " + programMemory.user.accountInfo);
+    //     console.log("<++> Successfully logged on as " + programMemory.user.accountInfo);
         
     // });
 
