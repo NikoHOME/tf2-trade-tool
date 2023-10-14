@@ -1,3 +1,4 @@
+import SteamUser from "steam-user";
 
 function processCurrencies(programMemory, item, currencies)
 {
@@ -37,6 +38,8 @@ function partnerCallback(err, inventory) {
     if(err != null)
     {
         console.log(err);
+        console.log("<!!> Failed to load client items retrying")
+        process.emit("retryFetch");
         return;
     }
 
@@ -49,18 +52,36 @@ function ownCallback(err, inventory) {
     if(err != null)
     {
         console.log(err);
+        console.log("<!!> Failed to load own items retrying")
+        process.emit("retryFetch");
         return;
     }
     process.emit("ownInventoryLoaded", inventory);    
 };
 
 
+function userDetailsCallback(err, personas) {
+    if(err != null) {
+        console.log(err);
+        console.log("<!!> Failed to load user details retrying")
+        process.emit("retryUserDetail");
+        return;
+    }
+
+    if(personas != null) {
+        let name = Object.values(personas)[0].player_name;
+        console.log("<++> Created an offer with " + "\'" + name  + "\'");
+    }
+
+    process.emit("userDetails");
+}
+
 
 export function fetch(programMemory)
 {
     programMemory.offer.getPartnerInventoryContents(programMemory.gameAppID, programMemory.inventoryContext, partnerCallback);
-    
 }
+
 
 
 export function addFetchListeners(programMemory)
@@ -81,6 +102,22 @@ export function addFetchListeners(programMemory)
         });
     
         programMemory.ownInventory = inventory;
+        programMemory.user.getPersonas([programMemory.offer.partner], userDetailsCallback);
+
+        //process.emit("userDetails");
+    });
+
+    process.on("retryFetch", () => {
+        fetch(programMemory);
+    });
+
+    process.on("retryUserDetail", () => {
+        programMemory.user.getPersonas([programMemory.offer.partner], userDetailsCallback);
+    });
+
+
+    process.on("userDetails", () => {
+
         process.emit("fetchEnded");
     });
 }
