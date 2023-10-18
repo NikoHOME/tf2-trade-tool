@@ -77,7 +77,7 @@ export class DealManager
 
         if(ownFoundItems == "err" || clientFoundItems == "err")
         {
-            console.log("Items missing trade aborted");
+            this.offerCallback("Items missing trade aborted")
             return null;
         }
 
@@ -87,9 +87,11 @@ export class DealManager
 
         let dealBalance = programMemory.metalManager.findDealBalance(programMemory.ownCurrencies, programMemory.clientCurrencies, args[1], args[2]);
         
+        // Error messaged included in findDealBalance returns null if no deal found
         if(dealBalance == null)
+        {
             return null;
-        
+        }
         let dealArrayNamesClient = ["keys", "refinedMetal", "reclaimedMetal", "scrapMetal"];
         let dealArrayNamesOwn = ["keysNegative", "refinedMetalNegative", "reclaimedMetalNegative", "scrapMetalNegative"];
         let currencyArrayNames = ["keyArray", "refinedArray", "reclaimedArray", "scrapArray"];
