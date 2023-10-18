@@ -62,6 +62,7 @@ function addReadLineEvent(programMemory)
                 break;
             case "url":
                 if(args.length > 1) {
+                    file.removeFailedOffer(); //reset previously failed offer as it's a different user
                     programMemory.clientTradeLink = args[1];
                     programMemory.offer = programMemory.tradeManager.createOffer(programMemory.clientTradeLink);
                     file.saveTradeUrl(args[1]);
