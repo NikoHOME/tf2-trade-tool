@@ -156,12 +156,12 @@ export class MetalManager
 
         if(keys < 0 && simpleCurrenciesOwn.keys < Math.abs(keys))
         {
-            console.log("Not enough keys [Own]");
+            console.log("<!!> Not enough keys [Own]");
             return null;
         }
         else if (simpleCurrenciesClient.keys < keys)
         {
-            console.log("Not enough keys [Client]");
+            console.log("<!!> Not enough keys [Client]");
             return null;
         }
 
@@ -200,7 +200,7 @@ export class MetalManager
         }
         else
         {
-            console.log("Not enough metal [Own/Client]")
+            console.log("<!!> Not enough metal [Own/Client]")
             return null
         }
     }

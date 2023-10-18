@@ -77,7 +77,7 @@ export class DealManager
 
         if(ownFoundItems == "err" || clientFoundItems == "err")
         {
-            this.offerCallback("Items missing trade aborted")
+            this.offerCallback("<!!> Items missing trade aborted")
             return null;
         }
 
