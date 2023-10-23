@@ -184,7 +184,7 @@ export class MetalManager
 
         this.iterateOverArrayBackward(balanceCalculationArray, simpleCurrenciesOwn, "refinedMetal", this.refinedMetalValue);
         this.iterateOverArrayBackward(balanceCalculationArray, simpleCurrenciesOwn, "reclaimedMetal", this.reclaimedMetalValue);
-        this.iterateOverArrayBackward(balanceCalculationArray, simpleCurrenciesOwn, "scrapMetal", this.crapMetalValue);
+        this.iterateOverArrayBackward(balanceCalculationArray, simpleCurrenciesOwn, "scrapMetal", this.scrapMetalValue);
 
         if(typeof balanceCalculationArray[finalBalance] != "undefined")
         {
