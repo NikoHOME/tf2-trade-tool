@@ -1,5 +1,5 @@
 
-
+//Class which config parses into
 class ConfigInfo
 {
     constructor()
@@ -11,6 +11,7 @@ class ConfigInfo
 
 import { readFile, writeFile, readFileSync, writeFileSync} from 'fs';
 
+//Basic line by line parsing with a ':' seperator without spaces
 export function parseConfig(path, callback)
 {
     
@@ -42,13 +43,16 @@ export function parseConfig(path, callback)
 }
 
 
-    // steamID:[U:1:143281396]
-    // {
-    //     "universe": 1,
-    //     "type": 1,
-    //     "instance": 1,
-    //     "accountid": 143281396
-    // }
+//function converting steam.npm id to this format steamID:[U:1:143281396]
+//used once in main 
+
+// steamID:[U:1:143281396]
+// {
+//     "universe": 1,
+//     "type": 1,
+//     "instance": 1,
+//     "accountid": 143281396
+// }
 
 export function steamIdToString(steamID) {
     return "[U:" + steamID.universe + ":" + steamID.accountid + "]";
@@ -57,6 +61,7 @@ export function steamIdToString(steamID) {
 
 import { existsSync, unlinkSync, appendFileSync, mkdirSync} from 'fs';
 
+//Enum for filenames in cache
 export const FileNames = {
     FailedOffer: 'failed_offer',
     LastTradeURL: 'last_trade_url',
@@ -80,6 +85,7 @@ export function saveToCacheFile(path, text) {
     writeFileSync("./cache/" + path, text);
 }
 
+//Checks for existense of important files
 export function checkForConfig() {
     if(!existsSync("./config.conf"))
         writeFileSync("./config.conf", "accountName:\npassword:\n");
@@ -90,7 +96,7 @@ export function checkForCacheDir() {
         mkdirSync("./cache");
 }
 
-
+//Special function for reading manual (isn't in the cache)
 export function readManual() {
     if(existsSync("./man"))
         return readFileSync("./man", 'utf8');
