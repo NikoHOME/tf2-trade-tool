@@ -26,19 +26,39 @@ export function restartProgram() {
 import * as file from "./file.js";
 
 function exitProgram() {
-    file.removeTradeUrl();
-    file.removeFailedOffer();
+    file.deleteCacheFile(file.FileNames.LastTradeURL);
+    file.deleteCacheFile(file.FileNames.LastCommand);
+    file.deleteCacheFile(file.FileNames.FailedOffer);
     process.exit(0);
 }
+
+
+import keypress from 'keypress';
+
+function addKeyListeners(programMemory)
+{
+    // make `process.stdin` begin emitting "keypress" events
+    keypress(process.stdin);
+    // listen for the "keypress" event
+    process.stdin.on('keypress', function (ch, key) {
+        console.log('got "keypress"', key);
+    });
+
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+}
+
 
 function addReadLineEvent(programMemory)
 {
     programMemory.readLine.on('line', (command) => {
-
+        process.stdin.pause(); // Pause key listeners
         let args = command.split(" ");
 
+        file.appendToCommandHistory(command);
+
         if(args[0] != "again") //prevent infinite loop
-            file.saveLastCommand(command);
+            file.saveToCacheFile(file.FileNames.LastCommand, command);
 
         switch(args[0]) {   
             case "new":
@@ -50,27 +70,27 @@ function addReadLineEvent(programMemory)
             case "deal":
                 if(programMemory.offer == null) {
                     console.log("<!!> No client specified use the url command");
-                    programMemory.readLine.prompt();
+                    programMemory.nextCommand()
                     break;
                 }
                 programMemory.dealManager.dealCase(args, programMemory); //emits offerSent
                 break;
             case "again": //repeat last command
-                let lastCommand = file.readLastCommand();
+                let lastCommand = file.readCacheFile(file.FileNames.LastCommand);
                 console.log("<++> Last Command: " + "\'" + lastCommand + "\'");
                 programMemory.readLine.emit("line", lastCommand);
                 break;
             case "url":
                 if(args.length > 1) {
-                    file.removeFailedOffer(); //reset previously failed offer as it's a different user
+                    file.deleteCacheFile(file.FileNames.FailedOffer); //reset previously failed offer as it's a different user
                     programMemory.clientTradeLink = args[1];
                     programMemory.offer = programMemory.tradeManager.createOffer(programMemory.clientTradeLink);
-                    file.saveTradeUrl(args[1]);
+                    file.saveToCacheFile(file.FileNames.LastTradeURL, args[1]);
                     fetch(programMemory); //emits fetchEnded
                     break;
                 }
                 console.log("<!!> Missing client trade link");
-                programMemory.readLine.prompt();
+                programMemory.nextCommand()
                 break;
             case "exit":
                 exitProgram();
@@ -78,11 +98,11 @@ function addReadLineEvent(programMemory)
             case "help":
                 let manual = file.readManual();
                 console.log(manual);
-                programMemory.readLine.prompt();
+                programMemory.nextCommand()
                 break;
             default:
                 console.log("<??> Unknown command, type help for help");
-                programMemory.readLine.prompt();
+                programMemory.nextCommand()
         }
     });
 }
@@ -94,9 +114,10 @@ export function readInput(programMemory) {
     programMemory.readLine.setPrompt('$ Command: ');
     addFetchListeners(programMemory);
     addReadLineEvent(programMemory);
+    addKeyListeners(programMemory);
     
     
-    let savedUrl = file.readTradeUrl(); //Check if we saved the trade link before exiting
+    let savedUrl = file.readCacheFile(file.FileNames.LastTradeURL); //Check if we saved the trade link before exiting
 
     if(savedUrl != "empty") {
         programMemory.clientTradeLink = savedUrl;
@@ -104,7 +125,7 @@ export function readInput(programMemory) {
         fetch(programMemory);
     }
     else {
-        programMemory.readLine.prompt();
+        programMemory.nextCommand()
     }
 
     
@@ -114,11 +135,11 @@ export function readInput(programMemory) {
         {
             console.log(error);
             console.log("<!!> Offer Error");
-            file.cacheFailedOffer(file.readLastCommand());
+            file.saveToCacheFile(file.FileNames.FailedOffer,file.readCacheFile(file.FileNames.LastCommand));
             restartProgram();
             return;
         }
-        file.removeFailedOffer();
+        file.deleteCacheFile(file.FileNames.FailedOffer);
         console.log("<++> Offer Sent");
         restartProgram();
     });
@@ -126,7 +147,7 @@ export function readInput(programMemory) {
     process.on("fetchEnded", () => {
         console.log("<++> Inventory fetch ended");
 
-        let failedOffer = file.readFailedOffer(); // Check if the last offer failed
+        let failedOffer = file.readCacheFile(file.FileNames.FailedOffer); // Check if the last offer failed
 
         if(failedOffer != "empty") {
             console.log("<++> Retrying offer: " + "\'" + failedOffer + "\'");
@@ -134,7 +155,7 @@ export function readInput(programMemory) {
             return;
         }
 
-        programMemory.readLine.prompt();
+        programMemory.nextCommand()
     });
    
    

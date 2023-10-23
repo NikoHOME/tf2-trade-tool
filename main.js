@@ -86,7 +86,7 @@ class SteamGuardCode
     }
 }
 
-import { saveRefreshToken, readRefreshToken} from './src/file.js';
+import { readCacheFile, saveToCacheFile, FileNames} from './src/file.js';
 
 function loginToSteam(parsedInfo, session)
 {   
@@ -94,15 +94,14 @@ function loginToSteam(parsedInfo, session)
     // const maxLoginRetries = 5;
     // let loginRetries = 0;
 
-    
-
     if(!parsedInfo.accountName || !parsedInfo.password)
     {
         console.log("Missing account info in config.conf file");
         process.exit(1);
     }
 
-    let token = readRefreshToken();
+    let token = readCacheFile(FileNames.RefreshToken);
+    // /console.log(token);
 
     if(token == "empty")
     {
@@ -120,7 +119,7 @@ function loginToSteam(parsedInfo, session)
 
     programMemory.user.on("loginKey", function(token) {
         programMemory.token = token;
-        saveRefreshToken(token);
+        saveToCacheFile(FileNames.RefreshToken, token);
     });
 
     process.on("steamGuardLogin", () => {
