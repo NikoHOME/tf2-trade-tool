@@ -3,8 +3,7 @@ import { Currencies } from "./metal.js";
 
 export class ProgramMemory
 {
-    constructor()
-    {
+    constructor() {
         this.offer = null;
         this.clientCurrencies = new Currencies();
         this.ownCurrencies = new Currencies();
@@ -26,5 +25,10 @@ export class ProgramMemory
         this.token;
         this.community;
         this.user;
+    }
+
+    nextCommand() {
+        readLine.prompt();
+        process.stdin.resume();
     }
 }

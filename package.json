@@ -1,6 +1,7 @@
 {
   "type": "module",
   "dependencies": {
+    "keypress": "^0.2.1",
     "steam": "^1.4.1",
     "steam-community": "^0.2.2",
     "steam-resources": "^1.0.0",
