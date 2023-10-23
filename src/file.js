@@ -55,89 +55,7 @@ export function steamIdToString(steamID) {
 }
 
 
-// export function saveRefreshToken(token) {
-//     writeFile("./cache/token", token, function(err) {
-//         if(err) {
-//             console.log(err);
-//             return;
-//         }
-//     }); 
-// }
-
-import { existsSync, unlinkSync, appendFileSync} from 'fs';
-
-// export function readRefreshToken() {
-//     if(existsSync("./cache/token"))
-//         return readFileSync("./cache/token", 'utf8');
-//     return "empty";
-// }
-
-// export function saveTradeUrl(url) {
-//     writeFile("./cache/url", url, function(err) {
-//         if(err) {
-//             console.log(err);
-//             return;
-//         }
-//     }); 
-// }
-
-// export function removeTradeUrl()
-// {
-//     if(existsSync("./cache/url"))
-//         unlinkSync("./cache/url");
-// }
-
-// export function readTradeUrl() {
-//     if(existsSync("./cache/url"))
-//         return readFileSync("./cache/url", 'utf8');
-//     return "empty";
-// }
-
-export function checkForConfig() {
-    if(!existsSync("./config.conf"))
-        writeFileSync("./config.conf", "accountName:\npassword:\n");
-}
-
-
-import { mkdirSync } from 'fs';
-
-export function checkForCacheDir() {
-    if(!existsSync("./cache"))
-        mkdirSync("./cache");
-}
-
-// export function readLastCommand() {
-//     if(existsSync("./cache/last_command"))
-//         return readFileSync("./cache/last_command", 'utf8');
-//     return "empty";
-// }
-
-// export function saveLastCommand(command) {
-//     writeFileSync("./cache/last_command", command);
-//}
-
-export function readManual() {
-    if(existsSync("./man"))
-        return readFileSync("./man", 'utf8');
-    return "empty";
-}
-
-// export function cacheFailedOffer(command) {
-//     writeFileSync("./cache/failed_command", command);
-// }
-
-// export function readFailedOffer()
-// {
-//     if(existsSync("./cache/failed_command"))
-//         return readFileSync("./cache/failed_command", 'utf8');
-//     return "empty";
-// }
-
-// export function removeFailedOffer()
-// {
-//     if(existsSync("./cache/failed_command"))
-//         unlinkSync("./cache/failed_command");
-// }
+import { existsSync, unlinkSync, appendFileSync, mkdirSync} from 'fs';
 
 export const FileNames = {
     FailedOffer: 'failed_offer',
@@ -145,7 +63,40 @@ export const FileNames = {
     LastCommand: 'last_command',
     RefreshToken: 'refresh_token',
     CommandHistory: 'history',
-  };
+};
+
+export function deleteCacheFile(path) {
+    if(existsSync("./cache/" + path))
+        unlinkSync("./cache/" + path);
+}
+
+export function readCacheFile(path) {
+    if(existsSync("./cache/" + path))
+        return readFileSync("./cache/" + path, 'utf8');
+    return "empty";
+}
+
+export function saveToCacheFile(path, text) {
+    writeFileSync("./cache/" + path, text);
+}
+
+export function checkForConfig() {
+    if(!existsSync("./config.conf"))
+        writeFileSync("./config.conf", "accountName:\npassword:\n");
+}
+
+export function checkForCacheDir() {
+    if(!existsSync("./cache"))
+        mkdirSync("./cache");
+}
+
+
+export function readManual() {
+    if(existsSync("./man"))
+        return readFileSync("./man", 'utf8');
+    return "empty";
+}
+
 
 
 export function getCommandHistoryLength()
@@ -182,17 +133,3 @@ export function appendToCommandHistory(command) {
     writeFileSync("./cache/history", command);
 }
 
-export function deleteCacheFile(path) {
-    if(existsSync("./cache/" + path))
-        unlinkSync("./cache/" + path);
-}
-
-export function readCacheFile(path) {
-    if(existsSync("./cache/" + path))
-        return readFileSync("./cache/" + path, 'utf8');
-    return "empty";
-}
-
-export function saveToCacheFile(path, text) {
-    writeFileSync("./cache/" + path, text);
-}

@@ -61,19 +61,6 @@ function readSteamGuardCode(steamGuardCode)
 }
 
 
-// function steamLoginCallback(err)
-// {   
-//     if(err)
-//     {
-//         console.log(err);
-//         console.log("Login Failed");
-//         process.emit("steamGuardRetry");
-//         return;
-//     }
-    
-//     process.emit("steamLogin");
-// }
-
 
 import { steamIdToString } from './src/file.js';
 import TradeOfferManager from 'steam-tradeoffer-manager';
@@ -93,8 +80,6 @@ import { readCacheFile, saveToCacheFile, FileNames} from './src/file.js';
 function loginToSteam(parsedInfo, session)
 {   
     let steamGuardCode = new SteamGuardCode();
-    // const maxLoginRetries = 5;
-    // let loginRetries = 0;
 
     if(!parsedInfo.accountName || !parsedInfo.password)
     {
@@ -103,7 +88,6 @@ function loginToSteam(parsedInfo, session)
     }
 
     let token = readCacheFile(FileNames.RefreshToken);
-    // /console.log(token);
 
     if(token == "empty")
     {
