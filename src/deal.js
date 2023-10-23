@@ -1,23 +1,22 @@
+//a class responsible for parsing the deal command, adding items to the offer and sending the offer
 
-
-import { restartProgram } from "./input.js";
-export class DealManager 
-{
+export class DealManager  {
     constructor() {
-
+        this.dealArrayNamesClient = ["keys", "refinedMetal", "reclaimedMetal", "scrapMetal"];
+        this.dealArrayNamesOwn = ["keysNegative", "refinedMetalNegative", "reclaimedMetalNegative", "scrapMetalNegative"];
+        this.currencyArrayNames = ["keyArray", "refinedArray", "reclaimedArray", "scrapArray"];
     }
 
-    findItems(items, inventory)
-    {
+    //Searches the inventory for wanted items and returns them as a list
+    findItems(items, inventory) {
         let foundItems = [];
         let foundItemsNames = [];
 
-        for(let wantedItem of items)
-        {
-            for(let item of inventory)
-            {
-                if(item.market_name == wantedItem)
-                {
+        
+        for(let wantedItem of items) {
+            for(let item of inventory) {
+                if(item.market_name == wantedItem) {
+                    //If the item is already in the list continue
                     if(foundItems.indexOf(item) >= 0)
                         continue; 
                     foundItems.push(item);
@@ -26,13 +25,10 @@ export class DealManager
                 }
             }
         }
-
-        if(foundItems.length != items.length)
-        {
-            for(let item of items)
-            {
-                if(foundItemsNames.indexOf(item) < 0)
-                {
+        //Print the missing items
+        if(foundItems.length != items.length) {
+            for(let item of items) {
+                if(foundItemsNames.indexOf(item) < 0) {
                     console.log(item + " is missing from inventory.");
                 }
             }
@@ -42,41 +38,34 @@ export class DealManager
         return foundItems;
     }
 
-    offerCallback(err, status)
-    {
-        if(err)
-        {
+    offerSendingCallback(err, status) {
+        if(err) {
             process.emit("offerSent",err);
             return;
         }
-        //console.log(status);
         process.emit("offerSent")
         
     }
 
-
-    dealCase(args, programMemory)
-    {
+    dealCase(args, programMemory) {
         let ownItemsQuery = [];
         let clientItemsQuery = [];
         let iterator = 3;
-
-        for(; args[iterator] != ":" && iterator < args.length ; ++iterator)
-        {
-            ownItemsQuery.push(args[iterator].replaceAll("_"," "));
+        //Parse own items
+        for(; args[iterator] != ":" && iterator < args.length ; ++iterator) {
+            ownItemsQuery.push(args[iterator].replace(/\s/g, "").replaceAll("_"," "));
         }
         iterator += 1;
-        for(; iterator < args.length && args[iterator] != ""; ++iterator)
-        {
-            clientItemsQuery.push(args[iterator].replaceAll("_"," "));
+        //Parse client items
+        for(; iterator < args.length && args[iterator] != ""; ++iterator) {
+            clientItemsQuery.push(args[iterator].replace(/\s/g, "").replaceAll("_"," "));
         }
 
-
+        //Find parsed items in the inventory
         let ownFoundItems = this.findItems(ownItemsQuery, programMemory.ownInventory);
         let clientFoundItems = this.findItems(clientItemsQuery, programMemory.clientInventory);
 
-        if(ownFoundItems == "err" || clientFoundItems == "err")
-        {
+        if(ownFoundItems == "err" || clientFoundItems == "err") {
             this.offerCallback("<!!> Items missing trade aborted")
             return null;
         }
@@ -84,35 +73,49 @@ export class DealManager
         programMemory.offer.addMyItems(ownFoundItems);
         programMemory.offer.addTheirItems(clientFoundItems);
 
-
-        let dealBalance = programMemory.metalManager.findDealBalance(programMemory.ownCurrencies, programMemory.clientCurrencies, args[1], args[2]);
+        //args[1] - key ammount
+        //args[2] - metal ammount
+        let dealBalance = programMemory.metalManager.findDealBalance(
+            programMemory.ownCurrencies,
+            programMemory.clientCurrencies,
+            args[1], 
+            args[2]
+        );
         
-        // Error messaged included in findDealBalance returns null if no deal found
+        // Error messaged included in findDealBalance method above returns null if no deal found
         if(dealBalance == null)
         {
             return null;
         }
-        let dealArrayNamesClient = ["keys", "refinedMetal", "reclaimedMetal", "scrapMetal"];
-        let dealArrayNamesOwn = ["keysNegative", "refinedMetalNegative", "reclaimedMetalNegative", "scrapMetalNegative"];
-        let currencyArrayNames = ["keyArray", "refinedArray", "reclaimedArray", "scrapArray"];
+        
+        //Add balanced currencies to both sides of the offer
 
-        for(let name = 0; name < 4; ++name)
-        {
-            for(let i = 0; i < dealBalance[dealArrayNamesClient[name]] ; ++i)
-            {
-                programMemory.offer.addTheirItem(programMemory.clientCurrencies[currencyArrayNames[name]][i]);
+        for(let currencyNameIndex = 0; currencyNameIndex < 4; ++currencyNameIndex) {
+
+            let realCurrencyName = this.currencyArrayNames[currencyNameIndex];
+
+            let calculatedCurrencyName = this.dealArrayNamesClient[currencyNameIndex];
+            let ammountOfCurrency = dealBalance[calculatedCurrencyName];
+            
+            for(let index = 0; index < ammountOfCurrency ; ++index) {
+
+                let currencyItem = programMemory.clientCurrencies[realCurrencyName][index];
+                programMemory.offer.addTheirItem(currencyItem);
+
+            }
+
+            calculatedCurrencyName = this.dealArrayNamesOwn[currencyNameIndex];
+            ammountOfCurrency = dealBalance[calculatedCurrencyName];
+
+            for(let index = 0; index < ammountOfCurrency ; ++index) {
+
+                let currencyItem = programMemory.ownCurrencies[realCurrencyName][index];
+                programMemory.offer.addMyItem(currencyItem);
+
             }
         }
-
-        for(let name = 0; name < 4; ++name)
-        {
-            for(let i = 0; i < dealBalance[dealArrayNamesOwn[name]] ; ++i)
-            {
-                programMemory.offer.addMyItem(programMemory.ownCurrencies[currencyArrayNames[name]][i]);
-            }
-        }
-
-        programMemory.offer.send(this.offerCallback);
+        //Send the offer and create a new one
+        programMemory.offer.send(this.offerSendingCallback);
         programMemory.offer = programMemory.tradeManager.createOffer(programMemory.clientTradeLink);
     }
 }
