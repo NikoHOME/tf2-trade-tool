@@ -13,6 +13,7 @@ export class ProgramMemory
         this.clientTradeLink;
         this.gameAppID = 440 //Team Fortress 2
         this.inventoryContext = 2; //Steam default
+        this.currentHistoryIndex = 0; // Command history picker
         this.mySid;
 
         this.readLine;
@@ -28,7 +29,7 @@ export class ProgramMemory
     }
 
     nextCommand() {
-        readLine.prompt();
+        this.readLine.prompt();
         process.stdin.resume();
     }
 }

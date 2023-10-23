@@ -143,8 +143,20 @@ export const FileNames = {
     FailedOffer: 'failed_offer',
     LastTradeURL: 'last_trade_url',
     LastCommand: 'last_command',
-    RefreshToken: 'refresh_token'
+    RefreshToken: 'refresh_token',
+    CommandHistory: 'history',
   };
+
+
+export function getCommandHistoryLength()
+{
+    if(existsSync("./cache/history")) {
+        const history = readFileSync("./cache/history", 'utf8');
+        let commandTable = history.split(/\r?\n/);
+        return commandTable.length;
+    }
+    return 0;
+}
 
 
 export function readCommandHistory(commandNumber)
@@ -152,14 +164,22 @@ export function readCommandHistory(commandNumber)
     if(existsSync("./cache/history")) {
         const history = readFileSync("./cache/history", 'utf8');
         let commandTable = history.split(/\r?\n/);
-        if(commandNumber < commandTable.length)
-            return commandTable[commandNumber];
+        if(commandNumber < commandTable.length) {
+            let output = commandTable[commandTable.length - commandNumber - 1];
+            return output;
+        }
+
     }
-    return "empty";
+    return "";
 }
 
 export function appendToCommandHistory(command) {
-    appendFileSync("./cache/history", command + "\n");
+    if(existsSync("./cache/history")) {
+        appendFileSync("./cache/history", "\n" + command);
+        return;
+    }
+
+    writeFileSync("./cache/history", command);
 }
 
 export function deleteCacheFile(path) {

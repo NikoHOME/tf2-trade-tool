@@ -32,27 +32,11 @@ function exitProgram() {
     process.exit(0);
 }
 
-
-import keypress from 'keypress';
-
-function addKeyListeners(programMemory)
-{
-    // make `process.stdin` begin emitting "keypress" events
-    keypress(process.stdin);
-    // listen for the "keypress" event
-    process.stdin.on('keypress', function (ch, key) {
-        console.log('got "keypress"', key);
-    });
-
-    process.stdin.setRawMode(true);
-    process.stdin.resume();
-}
-
-
 function addReadLineEvent(programMemory)
 {
     programMemory.readLine.on('line', (command) => {
         process.stdin.pause(); // Pause key listeners
+        programMemory.currentHistoryIndex = 0; // Reset history index
         let args = command.split(" ");
 
         file.appendToCommandHistory(command);
@@ -114,7 +98,6 @@ export function readInput(programMemory) {
     programMemory.readLine.setPrompt('$ Command: ');
     addFetchListeners(programMemory);
     addReadLineEvent(programMemory);
-    addKeyListeners(programMemory);
     
     
     let savedUrl = file.readCacheFile(file.FileNames.LastTradeURL); //Check if we saved the trade link before exiting
