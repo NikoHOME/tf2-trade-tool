@@ -23,7 +23,7 @@ import * as Readline from 'node:readline/promises';
 programMemory.readLine = Readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    history: readCacheFile(FileNames.CommandHistory).split(/\r?\n/),
+    history: readCacheFile(FileNames.CommandHistory).split(/\r?\n/).reverse(),
 });
 
 
