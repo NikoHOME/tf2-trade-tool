@@ -67,6 +67,7 @@ export class DealManager  {
 
         if(ownFoundItems == "err" || clientFoundItems == "err") {
             this.offerCallback("<!!> Items missing trade aborted")
+            programMemory.nextCommand();
             return null;
         }
 
@@ -85,6 +86,7 @@ export class DealManager  {
         // Error messaged included in findDealBalance method above returns null if no deal found
         if(dealBalance == null)
         {
+            programMemory.nextCommand();
             return null;
         }
         
