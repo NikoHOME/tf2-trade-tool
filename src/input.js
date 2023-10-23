@@ -40,6 +40,8 @@ function addReadLineEvent(programMemory)
         let args = command.split(" ");
 
         file.appendToCommandHistory(command);
+        //Reset fail counter for every command
+        file.deleteCacheFile(file.FileNames.RetryCounter);
 
         if(args[0] != "again") //prevent infinite loop
             file.saveToCacheFile(file.FileNames.LastCommand, command);
@@ -112,10 +114,9 @@ export function readInput(programMemory) {
     }
 
     
-
+    //Check if offer failed and save it in the cache before the reset
     process.on("offerSent", (error) => {
-        if(error)
-        {
+        if(error) {
             console.log(error);
             console.log("<!!> Offer Error");
             file.saveToCacheFile(file.FileNames.FailedOffer,file.readCacheFile(file.FileNames.LastCommand));
@@ -123,17 +124,27 @@ export function readInput(programMemory) {
             return;
         }
         file.deleteCacheFile(file.FileNames.FailedOffer);
+        file.deleteCacheFile(file.FileNames.RetryCounter);
         console.log("<++> Offer Sent");
         restartProgram();
     });
 
     process.on("fetchEnded", () => {
         console.log("<++> Inventory fetch ended");
-
-        let failedOffer = file.readCacheFile(file.FileNames.FailedOffer); // Check if the last offer failed
-
+        // Check if the last offer failed before the restart
+        let failedOffer = file.readCacheFile(file.FileNames.FailedOffer); 
+        
         if(failedOffer != "empty") {
-            console.log("<++> Retrying offer: " + "\'" + failedOffer + "\'");
+            file.incrementOfferRetryCounter();
+            let retryCounter = file.readCacheFile(file.FileNames.RetryCounter);
+
+            if(parseInt(retryCounter) > 3) {
+                console.log("<||> Retry limit exceeded aborting");
+                programMemory.nextCommand()
+                return;
+            }
+            console.log("<++> (" + retryCounter + ") Retrying offer: " + "\'" + failedOffer + "\'");
+            
             programMemory.readLine.emit("line", failedOffer);
             return;
         }

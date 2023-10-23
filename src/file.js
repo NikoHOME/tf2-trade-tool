@@ -68,6 +68,7 @@ export const FileNames = {
     LastCommand: 'last_command',
     RefreshToken: 'refresh_token',
     CommandHistory: 'history',
+    RetryCounter: 'retry_counter'
 };
 
 export function deleteCacheFile(path) {
@@ -107,8 +108,8 @@ export function readManual() {
 
 export function getCommandHistoryLength()
 {
-    if(existsSync("./cache/history")) {
-        const history = readFileSync("./cache/history", 'utf8');
+    if(existsSync("./cache/" + FileNames.CommandHistory)) {
+        const history = readFileSync("./cache/" + FileNames.CommandHistory, 'utf8');
         let commandTable = history.split(/\r?\n/);
         return commandTable.length;
     }
@@ -118,8 +119,8 @@ export function getCommandHistoryLength()
 
 export function readCommandHistory(commandNumber)
 {
-    if(existsSync("./cache/history")) {
-        const history = readFileSync("./cache/history", 'utf8');
+    if(existsSync("./cache/" + FileNames.CommandHistory)) {
+        const history = readFileSync("./cache/" + FileNames.CommandHistory, 'utf8');
         let commandTable = history.split(/\r?\n/);
         if(commandNumber < commandTable.length) {
             let output = commandTable[commandTable.length - commandNumber - 1];
@@ -131,11 +132,19 @@ export function readCommandHistory(commandNumber)
 }
 
 export function appendToCommandHistory(command) {
-    if(existsSync("./cache/history")) {
-        appendFileSync("./cache/history", "\n" + command);
+    if(existsSync("./cache/" + FileNames.CommandHistory)) {
+        appendFileSync("./cache/" + FileNames.CommandHistory, "\n" + command);
         return;
     }
 
-    writeFileSync("./cache/history", command);
+    writeFileSync("./cache/" + FileNames.CommandHistory, command);
 }
 
+
+export function incrementOfferRetryCounter() {
+    let number = readCacheFile(FileNames.RetryCounter);
+    if(number == "empty")
+        number = "0";
+    number = parseInt(number);
+    saveToCacheFile(FileNames.RetryCounter, (number+1).toString());
+}
