@@ -1,16 +1,16 @@
-# steam-trade-tool W.I.P
+# tf2-trade-tool W.I.P
 
 A simple terminal tool for trading tf2 items.  
 Precisely calculated the metal values to balance a trade deal.  
 Creates a trade offer with a minimal ammount of items needed.  
-
+Has internal history tracking.
 
 Currently avaible actions :
 - help (print help)
 - url (creates a trade offer from a trade url)
 - fetch (manually update inventory data)
 - deal [keys] [metal] [my_items] : [client_items] (send a trade offer with specified items, keys and metal)
-- again (repeat the last command)
+- ~~again (repeat the last command)~~ (depracated)
 - exit (exits program and clears cache)
 - new (restart program)
 
