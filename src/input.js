@@ -23,6 +23,8 @@ export function restartProgram() {
             }
         );
     });
+    // Mark this session as correctly exited
+    file.saveToCacheFile(file.FileNames.PlannedRestart, "true");
     process.exit(0);
 }
 
@@ -100,7 +102,23 @@ function addReadLineEvent(programMemory)
 
 import { fetch, addFetchListeners } from "./fetch.js";
 
-export function readInput(programMemory) {
+export function startPrompt(programMemory) {
+
+    // Check if the last session was
+    // correctly exited (marked to keep)
+
+    let exitCheck = file.readCacheFile(file.FileNames.PlannedRestart);
+    // Remove mark for the next check 
+    file.deleteCacheFile(file.FileNames.PlannedRestart);
+
+    // If not marked to keep
+    // clean temporary cache
+    if(exitCheck == "empty") {
+        file.deleteCacheFile(file.FileNames.LastTradeURL);
+        file.deleteCacheFile(file.FileNames.LastCommand);
+        file.deleteCacheFile(file.FileNames.FailedOffer);
+        file.deleteCacheFile(file.FileNames.RetryCounter);
+    }
 
     programMemory.readLine.setPrompt('$ Command: ');
     addFetchListeners(programMemory);

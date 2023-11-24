@@ -64,7 +64,7 @@ function readSteamGuardCode(steamGuardCode)
 
 import { steamIdToString } from './src/file.js';
 import TradeOfferManager from 'steam-tradeoffer-manager';
-import { readInput } from './src/input.js';
+import { startPrompt } from './src/input.js';
 
 
 class SteamGuardCode
@@ -143,7 +143,7 @@ function startTradeManager(programMemory)
     });
 
     programMemory.mySid = new SteamID(steamIdToString(programMemory.user.steamID));
-    readInput(programMemory);
+    startPrompt(programMemory);
 }
 
 

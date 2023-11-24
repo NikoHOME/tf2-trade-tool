@@ -68,7 +68,9 @@ export const FileNames = {
     LastCommand: 'last_command',
     RefreshToken: 'refresh_token',
     CommandHistory: 'history',
-    RetryCounter: 'retry_counter'
+    RetryCounter: 'retry_counter',
+
+    PlannedRestart: 'planned_restart',
 };
 
 export function deleteCacheFile(path) {
