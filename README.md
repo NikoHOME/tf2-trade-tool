@@ -10,7 +10,6 @@ Currently avaible actions :
 - url (creates a trade offer from a trade url)
 - fetch (manually update inventory data)
 - deal [keys] [metal] [my_items] : [client_items] (send a trade offer with specified items, keys and metal)
-- ~~again (repeat the last command)~~ (depracated)
 - exit (exits program and clears cache)
 - new (restart program)
 

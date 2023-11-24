@@ -35,16 +35,11 @@ function exitProgram() {
 function addReadLineEvent(programMemory)
 {
     programMemory.readLine.on('line', (command) => {
-        process.stdin.pause(); // Pause key listeners
-        programMemory.currentHistoryIndex = 0; // Reset history index
+        process.stdin.pause(); // Pause key listeners during execution
+        programMemory.currentHistoryIndex = 0; // Reset history index for built in
+                                               // promt history support to work with cache files
         let args = command.split(" ");
-
         file.appendToCommandHistory(command);
-        //Reset fail counter for every command
-        file.deleteCacheFile(file.FileNames.RetryCounter);
-
-        if(args[0] != "again") //prevent infinite loop
-            file.saveToCacheFile(file.FileNames.LastCommand, command);
 
         switch(args[0]) {   
             case "new":
@@ -60,11 +55,6 @@ function addReadLineEvent(programMemory)
                     break;
                 }
                 programMemory.dealManager.dealCase(args, programMemory); //emits offerSent
-                break;
-            case "again": //repeat last command
-                let lastCommand = file.readCacheFile(file.FileNames.LastCommand);
-                console.log("<++> Last Command: " + "\'" + lastCommand + "\'");
-                programMemory.readLine.emit("line", lastCommand);
                 break;
             case "url":
                 if(args.length > 1) {
