@@ -3,6 +3,10 @@
 
 import { spawnSync } from "child_process"
 
+
+// Steam trader npm package is weird
+// it's easier to restart after every
+// offer to prevent errors
 export function restartProgram() {
     process.on("exit", function () {
         //  Resolve the `child_process` module, and `spawn`
@@ -20,11 +24,12 @@ export function restartProgram() {
         );
     });
     process.exit(0);
-
 }
 
 import * as file from "./file.js";
 
+// Delete cache files that
+// can affect the next sesssion
 function exitProgram() {
     file.deleteCacheFile(file.FileNames.LastTradeURL);
     file.deleteCacheFile(file.FileNames.LastCommand);
@@ -35,9 +40,11 @@ function exitProgram() {
 function addReadLineEvent(programMemory)
 {
     programMemory.readLine.on('line', (command) => {
-        process.stdin.pause(); // Pause key listeners during execution
-        programMemory.currentHistoryIndex = 0; // Reset history index for built in
-                                               // promt history support to work with cache files
+        // Pause key listeners during execution
+        process.stdin.pause();     
+        // Reset history index for built in
+        // promt history support to work with cache files             
+        programMemory.currentHistoryIndex = 0;  
         let args = command.split(" ");
         file.appendToCommandHistory(command);
 
@@ -46,7 +53,9 @@ function addReadLineEvent(programMemory)
                 restartProgram();
                 break;
             case "fetch":
-                fetch(programMemory); //emits fetchEnded
+                // Emits fetchEnded to
+                // come back to the prompt after       
+                fetch(programMemory); 
                 break;
             case "deal":
                 if(programMemory.offer == null) {
@@ -54,15 +63,21 @@ function addReadLineEvent(programMemory)
                     programMemory.nextCommand()
                     break;
                 }
-                programMemory.dealManager.dealCase(args, programMemory); //emits offerSent
+                // Emits offerSent to
+                // come back to the prompt after
+                programMemory.dealManager.dealCase(args, programMemory); 
                 break;
             case "url":
                 if(args.length > 1) {
-                    file.deleteCacheFile(file.FileNames.FailedOffer); //reset previously failed offer as it's a different user
+                    // Delete cache files from
+                    // previous trader
+                    file.deleteCacheFile(file.FileNames.FailedOffer);
                     programMemory.clientTradeLink = args[1];
                     programMemory.offer = programMemory.tradeManager.createOffer(programMemory.clientTradeLink);
                     file.saveToCacheFile(file.FileNames.LastTradeURL, args[1]);
-                    fetch(programMemory); //emits fetchEnded
+                    // Emits fetchEnded to
+                    // come back to the prompt after   
+                    fetch(programMemory); 
                     break;
                 }
                 console.log("<!!> Missing client trade link");
@@ -91,8 +106,9 @@ export function readInput(programMemory) {
     addFetchListeners(programMemory);
     addReadLineEvent(programMemory);
     
-    
-    let savedUrl = file.readCacheFile(file.FileNames.LastTradeURL); //Check if we saved the trade link before exiting
+    // Check for the trade link
+    // used on the last session
+    let savedUrl = file.readCacheFile(file.FileNames.LastTradeURL); 
 
     if(savedUrl != "empty") {
         programMemory.clientTradeLink = savedUrl;
@@ -104,15 +120,20 @@ export function readInput(programMemory) {
     }
 
     
-    //Check if offer failed and save it in the cache before the reset
+    // Check if offer failed and 
+    // save it in the cache before the reset
     process.on("offerSent", (error) => {
         if(error) {
+            // Report the error and save
+            // it for the next process
             console.log(error);
             console.log("<!!> Offer Error");
             file.saveToCacheFile(file.FileNames.FailedOffer,file.readCacheFile(file.FileNames.LastCommand));
             restartProgram();
             return;
         }
+        // Clean the cache in case
+        // for the next failed offfer
         file.deleteCacheFile(file.FileNames.FailedOffer);
         file.deleteCacheFile(file.FileNames.RetryCounter);
         console.log("<++> Offer Sent");
@@ -121,7 +142,8 @@ export function readInput(programMemory) {
 
     process.on("fetchEnded", () => {
         console.log("<++> Inventory fetch ended");
-        // Check if the last offer failed before the restart
+        // Check if the last offer failed 
+        // before the restart to continue it
         let failedOffer = file.readCacheFile(file.FileNames.FailedOffer); 
         
         if(failedOffer != "empty") {
@@ -134,11 +156,13 @@ export function readInput(programMemory) {
                 return;
             }
             console.log("<++> (" + retryCounter + ") Retrying offer: " + "\'" + failedOffer + "\'");
-            
+            // Enter failed offer to promt and continue 
             programMemory.readLine.emit("line", failedOffer);
             return;
         }
-
+        // Reset retry counter from previous
+        // offers and continue as normal
+        file.deleteCacheFile(file.FileNames.RetryCounter);
         programMemory.nextCommand()
     });
    
