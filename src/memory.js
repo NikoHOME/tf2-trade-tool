@@ -16,10 +16,8 @@ import TradeOfferManager from 'steam-tradeoffer-manager';
 import { startPrompt } from './input.js';
 
 
-class SteamGuardCode
-{
-    constructor ()
-    {
+class SteamGuardCode {
+    constructor () {
         this.value = 0;
     }
 }
@@ -70,9 +68,9 @@ export class ProgramMemory
         this.readLine.prompt();
         process.stdin.resume();
     }
-
-    startTradeManager()
-    {
+    
+    // Start the main trade manager
+    startTradeManager() {
         this.tradeManager = new TradeOfferManager({
             "community": this.community,
             "steam": this.user,
@@ -84,28 +82,9 @@ export class ProgramMemory
         startPrompt(this);
     }
 
-    loginToSteam(parsedInfo) {   
-        let steamGuardCode = new SteamGuardCode();
-
-        if(!parsedInfo.accountName || !parsedInfo.password) {
-            console.log("Missing account info in config.conf file");
-            process.exit(1);
-        }
-
-        let token = file.readCacheFile(file.FileNames.RefreshToken);
-
-        if(token == "empty") {
-            readSteamGuardCode(steamGuardCode);
-        }
-        else {
-            this.token = token;
-            this.user.logOn({
-                refreshToken: token,
-                rememberPassword: true,
-            });
-        }
-
-
+    // Add event listeners
+    // for steam login process
+    #addLoginListeners(steamGuardCode) {
         this.user.on("loginKey", function(token) {
             global.programMemory.token = token;
             file.saveToCacheFile(FileNames.RefreshToken, token);
@@ -131,8 +110,36 @@ export class ProgramMemory
         });
     }
 
+    // Start the steam login process
+    #loginToSteam(parsedInfo) {   
+        let steamGuardCode = new SteamGuardCode();
 
-    readSteamGuardCode(steamGuardCode) {
+        if(!parsedInfo.accountName || !parsedInfo.password) {
+            console.log("Missing account info in config.conf file");
+            process.exit(1);
+        }
+        // Check if the refreshtoken exists
+        // otherwise login via steamGuard
+        // TODO check if the token is valid
+        let token = file.readCacheFile(file.FileNames.RefreshToken);
+
+        if(token == "empty") {
+            this.#readSteamGuardCode(steamGuardCode);
+        }
+        else {
+            this.token = token;
+            this.user.logOn({
+                refreshToken: token,
+                rememberPassword: true,
+            });
+        }
+
+        this.#addLoginListeners(steamGuardCode);
+    }
+
+    // Temporarily use the node promt
+    // for steam guard code input
+    #readSteamGuardCode(steamGuardCode) {
         this.readLine.setPrompt('Steam Guard Code: ');
         this.readLine.prompt();
 
@@ -142,12 +149,14 @@ export class ProgramMemory
             process.emit("steamGuardLogin");
         });
     }
-
+    // Main start function
+    // parse the config and login
+    // to steam
     startProgram() {
         file.checkForConfig();
         file.checkForCacheDir();
 
         let parsedInfo = file.parseConfig("./config.conf");
-        this.loginToSteam(parsedInfo);
+        this.#loginToSteam(parsedInfo);
     }
 }
