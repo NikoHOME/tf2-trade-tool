@@ -12,34 +12,28 @@ class ConfigInfo
 import { readFile, writeFile, readFileSync, writeFileSync} from 'fs';
 
 //Basic line by line parsing with a ':' seperator without spaces
-export function parseConfig(path, callback)
+export function parseConfig(path)
 {
+    let data = readFileSync(path, 'utf8');
     
-    readFile(path, 'utf8', (err, data) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
+    let lines = data.split("\n");
+    let configInfo = new ConfigInfo();
+
+    for(let line of lines)
+    {
+        if(!line)
+            continue;
+
+        let split = line.indexOf(':');
+
+        let info = [line.slice(0,split), line.slice(split+1)];
+
+        configInfo[info[0]]= info[1];
+        
+    }
     
-        let lines = data.split("\n");
-        let configInfo = new ConfigInfo();
-
-        for(let line of lines)
-        {
-            if(!line)
-                continue;
-
-            let split = line.indexOf(':');
-
-            let info = [line.slice(0,split), line.slice(split+1)];
-
-            configInfo[info[0]]= info[1];
-            
-        }
-        
-        
-        callback(configInfo);
-    });
+    
+    return configInfo;
 }
 
 
