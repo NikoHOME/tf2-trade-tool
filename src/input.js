@@ -39,8 +39,7 @@ function exitProgram() {
     process.exit(0);
 }
 
-function addReadLineEvent(programMemory)
-{
+function addReadLineEvent(programMemory) {
     programMemory.readLine.on('line', (command) => {
         // Pause key listeners during execution
         process.stdin.pause();     
