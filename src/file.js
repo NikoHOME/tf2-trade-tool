@@ -9,7 +9,7 @@ class ConfigInfo
     }
 }
 
-import { readFile, writeFile, readFileSync, writeFileSync} from 'fs';
+import { readFileSync, writeFileSync} from 'fs';
 
 //Basic line by line parsing with a ':' seperator without spaces
 export function parseConfig(path)
