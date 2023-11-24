@@ -123,11 +123,6 @@ function loginToSteam(parsedInfo, session)
         startTradeManager(programMemory)
     });
 
-    // programMemory.user.on("loggedOn", function() {
-    //     console.log("<++> Successfully logged on as " + programMemory.user.accountInfo);
-        
-    // });
-
     programMemory.user.on("webSession", function(sessionID, cookies) {
         programMemory.community.setCookies(cookies);
     });
