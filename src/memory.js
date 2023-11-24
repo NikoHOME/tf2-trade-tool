@@ -152,6 +152,8 @@ export class ProgramMemory
     // Main start function
     // parse the config and login
     // to steam
+    // TODO add prompt for
+    // login info
     startProgram() {
         file.checkForConfig();
         file.checkForCacheDir();
