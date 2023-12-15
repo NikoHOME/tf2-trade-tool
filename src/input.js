@@ -48,6 +48,7 @@ function addReadLineEvent(programMemory) {
         programMemory.currentHistoryIndex = 0;  
         let args = command.split(" ");
         file.appendToCommandHistory(command);
+        file.saveToCacheFile(file.FileNames.LastCommand, command);
 
         switch(args[0]) {   
             case "new":
