@@ -170,6 +170,7 @@ export function startPrompt(programMemory) {
 
             if(parseInt(retryCounter) > 3) {
                 console.log("<||> Retry limit exceeded aborting");
+                file.deleteCacheFile(file.FileNames.RetryCounter);
                 programMemory.nextCommand()
                 return;
             }
